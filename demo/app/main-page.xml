@@ -1,6 +1,26 @@
 <Page xmlns="http://schemas.nativescript.org/tns.xsd" loaded="pageLoaded" class="page"
-  xmlns:ui="nativescript-transcoder">
-  <StackLayout class="p-20">
-    <Label text="{{ message }}" class="t-20 text-center c-black" textWrap="true"/>
-  </StackLayout>
+  xmlns:ui="nativescript-transcoder"
+  xmlns:VideoPlayer="nativescript-videoplayer">
+  <GridLayout rows="auto,*" columns="*">
+    <StackLayout row="0" col="0">
+      <Button text="Test" tap="{{test}}" />
+      <Button text="Record sample" class="t-20 text-center c-black" tap="{{record}}" />
+      <Button text="Transcode 1mbps!" class="t-20 text-center c-black" tap="{{transcode}}" />
+      <ScrollView>
+        <GridLayout rows="auto,auto,auto" columns="auto,*">
+          <Label row="0" col="0" text="Transcoder Status: " />
+          <Label row="0" col="1" text="{{transcoder.status}}" textWrap="true" />
+          <Label row="1" col="0" text="Transcoder Progress: " />
+          <Label row="1" col="1" text="{{transcoder.progress}}" color="red" textWrap="true" />
+          <Label row="2" col="0" text="Error: " />
+          <Label row="2" col="1" text="{{error}}" color="red" textWrap="true" />
+        </GridLayout>
+      </ScrollView>
+      <GridLayout rows="auto" columns="*,*" >
+        <Button row="0" col="0" text="Play sample" tap="{{playSample}}" />
+        <Button row="0" col="1" text="Play transcoded" tap="{{playTranscoded}}" />
+      </GridLayout>
+    </StackLayout>
+    <VideoPlayer:Video row="1" col="0" height="100%" id="videoPlayer" />
+  </GridLayout>
 </Page>

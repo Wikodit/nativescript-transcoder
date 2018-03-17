@@ -8,7 +8,9 @@
 android {  
   defaultConfig {  
     generatedDensities = []
-    applicationId = "org.nativescript.demo"  
+    applicationId = "org.nativescript.demo"
+    minSdkVersion = 18
+    targetSdkVersion = 25
   }  
   aaptOptions {  
     additionalParameters "--no-version-vectors"  

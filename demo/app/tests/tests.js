@@ -1,12 +1,8 @@
 var Transcoder = require("nativescript-transcoder").Transcoder;
-var transcoder = new Transcoder();
+var transcoder = new Transcoder('none', {});
 
-describe("greet function", function() {
-    it("exists", function() {
-        expect(transcoder.greet).toBeDefined();
-    });
-
-    it("returns a string", function() {
-        expect(transcoder.greet()).toEqual("Hello, NS");
-    });
+describe("transcode function", function() {
+  it("exists", function() {
+    expect(transcoder.transcode).toBeDefined();
+  });
 });
