@@ -23,16 +23,6 @@ export class MainViewModel extends Observable {
     super();
   }
 
-  test() {
-    console.log('tes2t');
-    //  (<any>global).MediaCodecInfo = MediaCodecInfo;
-    // console.log(0, MediaCodecInfo.CodecCapabilities);
-    // console.log(1, (<any>MediaCodecInfo).getCapabilitiesForType("video/hevc").getVideoCapabilities());
-    // console.log(2, (<any>MediaCodecInfo).getCapabilitiesForType("video/avc").getVideoCapabilities());
-    // console.log(3, (<any>MediaCodecInfo).getCapabilitiesForType("video/hevc").getEncoderCapabilities());
-    // console.log(4, (<any>MediaCodecInfo).getCapabilitiesForType("video/avc").getEncoderCapabilities());
-  }
-
   videoPlayerLoaded({ object }: { object: Video }) {
     this.videoPlayer = object;
   }

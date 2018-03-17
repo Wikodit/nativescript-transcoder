@@ -66,11 +66,6 @@ export enum TranscoderEventList {
   Progress = 'progress',
 }
 
-export enum TranscoderExceptionTypeList {
-  Canceled = 'CANCELED',
-  Failed = 'FAILED',
-}
-
 export enum TranscoderNativeTranscoder {
   // Auto = 'AUTO',
   Hardware = 'HARDWARE',
@@ -79,14 +74,14 @@ export enum TranscoderNativeTranscoder {
 
 export interface TranscoderOptions {
   /**
-   * Adjust video bitrate, default to 8mbps
+   * Adjust video bitrate, default to null (keep bitrate)
    * @type {number}
    * @memberof TranscoderOptions
    */
   videoBitrate?: number;
 
   /**
-   * Adjust audio bitrate, default is to reuse the same
+   * Adjust audio bitrate, default to null (keep bitrate)
    * @type {number}
    * @memberof TranscoderOptions
    */
@@ -118,17 +113,55 @@ export interface TranscoderOptions {
    * @memberof TranscoderOptions
    */
   nativeTranscoder?: TranscoderNativeTranscoder;
+
+  /**
+   * Define the output resolution of the video
+   *
+   * Positive number represent a constraint on the smaller side of the video
+   * Negative number represent a constraint on the larger side of the video
+   *
+   * Important: the video will never be scalled up !
+   *
+   * Default or null to not resize the video
+   *
+   * Ex:
+   * - input: 1920x1080, resolutionConstraint: 720, output: 1280x720
+   * - input: 1920x1080, resolutionConstraint: -720, output: 720x405
+   * @type {number}
+   * @memberof TranscoderOptions
+   */
+  resolutionConstraint?: number;
 }
 
 export interface TranscoderResult {
   filePath: string;
 }
 
+export enum TranscoderExceptionType {
+  /** User canceled exception */
+  Canceled = 'CANCELED',
+
+  /** Generic failure error */
+  Failed = 'FAILED',
+
+  /** Generic error when Input can not be transcoded */
+  InvalidInputFormat = 'INVALID_INPUT',
+
+  /** Happens when output resolution is not correct (like floating number) */
+  InvalidOutputResolution = 'INVALID_OUTPUT_RESOLUTION',
+
+  /** Happens when no video codec correspond on the device */
+  InvalidOutputVideoCodec = 'INVALID_OUTPUT_VIDEO_CODEC',
+
+  /** Happens when at the end, the device is not capable to hardware transcode a given format */
+  InvalidOutputFormat = 'INVALID_OUTPUT_FORMAT',
+}
+
 export class TranscoderException extends Error {
-  public type: TranscoderExceptionTypeList;
+  public type: TranscoderExceptionType;
   public nativeError: any;
 
-  constructor(type: TranscoderExceptionTypeList, message: string, nativeError?: any) {
+  constructor(type: TranscoderExceptionType, message: string, nativeError?: any) {
     super(message);
     this.type = type;
     this.nativeError = nativeError;
@@ -181,11 +214,12 @@ export abstract class TranscoderCommon extends Observable {
     super();
     this.filePath = filePath;
     this.options = Object.assign({
-      bitrate: 8000 * 1000, // 8mbps
+      videoBitrate: null,
       audioBitrate: null,
       videoCodec: TranscoderVideoCodec.Auto,
       audioCodec: TranscoderAudioCodec.Aac,
       nativeTranscoder: TranscoderNativeTranscoder.Hardware,
+      resolutionConstraint: null,
     });
   }
 

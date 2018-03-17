@@ -1,4 +1,5 @@
 import { Observable } from "tns-core-modules/ui/page/page";
+import { TranscoderException } from ".";
 
 export function ObservableProperty (target: Observable, propertyKey: string) {
   Object.defineProperty(target, propertyKey, {
@@ -21,4 +22,20 @@ export function ObservableProperty (target: Observable, propertyKey: string) {
     enumerable: true,
     configurable: true
   });
+}
+
+export function BindThrowToReject (rejectKey: string, returnValue: any, isRejectedKey?: string) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    descriptor.value = function (...args) {
+      try {
+        return originalMethod.apply(this, args);
+      } catch (err) {
+        // if (isRejectedKey) this[isRejectedKey] = true;
+        return this[rejectKey](err);
+      }
+    };
+
+    return descriptor;
+  };
 }

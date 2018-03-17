@@ -3,7 +3,6 @@
   xmlns:VideoPlayer="nativescript-videoplayer">
   <GridLayout rows="auto,*" columns="*">
     <StackLayout row="0" col="0">
-      <Button text="Test" tap="{{test}}" />
       <Button text="Record sample" class="t-20 text-center c-black" tap="{{record}}" />
       <Button text="Transcode 1mbps!" class="t-20 text-center c-black" tap="{{transcode}}" />
       <ScrollView>
