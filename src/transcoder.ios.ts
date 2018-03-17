@@ -1,5 +1,5 @@
-import { Common } from './transcoder.common';
+import { TranscoderCommon } from './transcoder.common';
 
-export class Transcoder extends Common {
+export class Transcoder extends TranscoderCommon {
 
 }
