@@ -1,7 +1,7 @@
 {
   "name": "nativescript-transcoder",
   "version": "0.1.0",
-  "description": "Your awesome NativeScript plugin.",
+  "description": "A nativescript-transcoder plugin, to transcode videos (use AVFoundation on iOS and android-transcoder on Android)",
   "main": "transcoder",
   "typings": "index.d.ts",
   "nativescript": {
@@ -31,7 +31,9 @@
     "NativeScript",
     "JavaScript",
     "Android",
-    "iOS"
+    "iOS",
+    "Transcoder",
+    "Video"
   ],
   "author": {
     "name": "Jeremy Trufier",
@@ -49,7 +51,7 @@
     "tns-core-modules": "^3.1.0",
     "tns-platform-declarations": "^3.1.0",
     "tslint": "^5.0.0",
-    "typescript": "~2.3.0"
+    "typescript": "^2.7.2"
   },
   "dependencies": {},
   "bootstrapper": "nativescript-plugin-seed",
