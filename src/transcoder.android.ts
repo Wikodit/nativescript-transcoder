@@ -290,7 +290,10 @@ export class AutoMediaFormatStrategy extends java.lang.Object {
       MediaFormatStrategyPresets.AUDIO_CHANNELS_AS_IS,
     );
     format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-    format.setInteger(MediaFormat.KEY_BIT_RATE, this.options.audioBitrate);
+    format.setInteger(
+      MediaFormat.KEY_BIT_RATE,
+      this.options.audioBitrate || MediaFormatStrategyPresets.AUDIO_BITRATE_AS_IS
+    );
     return format;
   }
 

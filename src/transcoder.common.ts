@@ -268,7 +268,7 @@ export abstract class TranscoderCommon extends Observable {
   }
 
   /**
-   * Start the transcoding
+   * Launch the transcoding
    *
    * @returns {Promise<TranscoderResult>}
    * @memberof TranscoderCommon
