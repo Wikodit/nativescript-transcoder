@@ -1,6 +1,6 @@
 {
   "name": "nativescript-transcoder",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.0",
   "description": "A nativescript-transcoder plugin, to transcode videos (use AVFoundation on iOS and android-transcoder on Android)",
   "main": "transcoder",
   "typings": "index.d.ts",
