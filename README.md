@@ -118,7 +118,7 @@ All options are optionals.
     
 | Property | Default | Description |
 | --- | --- | --- |
-| `videoBitrate: number` | `null` | Adjust video bitrate (in bps), default to null (keep bitrate) |
+| `videoBitrate: number` | `null` | Adjust video bitrate<br>Default to `null`.<br>When `null`, try to use the same bitrate as input, but bitrate information can not always be retrieved on h264 on Android, as a result if encoding is necessary, bitrate will default to 1mbps (1000000). |
 | `audioBitrate: number` | `null` | Adjust audio bitrate (in bps), default to null (keep bitrate) |
 | `videoCodec: TranscoderVideoCodec` | `TranscoderVideoCodec.Auto` | Define the video codec to use. Be careful, all device does not support all codecs, use `TranscoderVideoCodec.Auto` if not sure. |
 | `audioCodec: TranscoderAudioCodec` | `TranscoderVideoCodec.Aac` | Define the audio codec to use. Only AAC supported for now. |

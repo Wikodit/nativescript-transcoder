@@ -74,7 +74,9 @@ export enum TranscoderNativeTranscoder {
 
 export interface TranscoderOptions {
   /**
-   * Adjust video bitrate, default to null (keep bitrate)
+   * Adjust video bitrate
+   * default to 8mbps (8000000) on android
+   * Pass null to try to auto-detect, but bitrate information can not always be retrieved on h264
    * @type {number}
    * @memberof TranscoderOptions
    */
@@ -220,7 +222,7 @@ export abstract class TranscoderCommon extends Observable {
       audioCodec: TranscoderAudioCodec.Aac,
       nativeTranscoder: TranscoderNativeTranscoder.Hardware,
       resolutionConstraint: null,
-    });
+    }, options);
   }
 
   /**
