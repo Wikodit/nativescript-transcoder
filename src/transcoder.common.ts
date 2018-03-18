@@ -133,6 +133,12 @@ export interface TranscoderOptions {
    * @memberof TranscoderOptions
    */
   resolutionConstraint?: number;
+
+  /**
+   * If this is true, the transcoder will through an error if the video can not be scaled according
+   * to the defined `resolutionConstraint`. Otherwise, it will use the nearest possible resolution.
+   */
+  strictResolutionConstraint?: boolean;
 }
 
 export interface TranscoderResult {

@@ -5,23 +5,57 @@ import { Video } from 'nativescript-videoplayer';
 import { alert } from 'tns-core-modules/ui/dialogs';
 import { ObservableProperty } from 'nativescript-transcoder/decorators';
 import { getString, setString } from 'tns-core-modules/application-settings';
+import { isAndroid } from 'tns-core-modules/platform';
 // import MediaCodecInfo = android.media.MediaCodecInfo;
+
+enum FSScale {
+  Byte = 0,
+  KiloByte = 1,
+  MegaByte = 2,
+  GigaByte = 3,
+  TeraByte = 4,
+  PetaByte = 5,
+}
 
 export class MainViewModel extends Observable {
   @ObservableProperty
   public error: string = '';
 
   @ObservableProperty
-  public rawFilePath: string = getString('rawFilePath');
+  public rawFilePath: string;
 
   @ObservableProperty
-  public transcodedFilePath: string = getString('transcodedFilePath');
+  public transcodedFilePath: string;
 
   public videoPlayer: Video;
   private transcoder: Transcoder = null;
 
   constructor() {
     super();
+
+    this.addEventListener(Observable.propertyChangeEvent, (
+      { propertyName, value }: PropertyChangeData
+    ) => {
+      if ((propertyName === 'rawFilePath' || propertyName === 'transcodedFilePath') && value) {
+        const fileSize = Math.round(this.getFileSize(value, FSScale.MegaByte) * 100) / 100;
+        this.set(`${propertyName.replace('Path', '')}Size`, `${fileSize} MB`);
+        return;
+      }
+    });
+
+    this.rawFilePath = getString('rawFilePath');
+    this.transcodedFilePath = getString('transcodedFilePath');
+  }
+
+  getFileSize(path, scale: FSScale) {
+    if (isAndroid) {
+      const file = new java.io.File(path);
+      return file.length() / Math.pow(1024, scale);
+    }
+    else {
+      const fileAttributes = NSFileManager.defaultManager.attributesOfItemAtPathError(path);
+      return fileAttributes.objectForKey(NSFileSize) / Math.pow(1000, scale);
+    }
   }
 
   videoPlayerLoaded({ object }: { object: Video }) {
@@ -69,16 +103,18 @@ export class MainViewModel extends Observable {
     }
 
     const transcoder = new Transcoder(this.rawFilePath, {
-      videoBitrate: 100 * 1000, // 100kbps
-      resolutionConstraint: 480,
+      videoBitrate: 1000 * 1000, // 1mbps
+      resolutionConstraint: 720,
     });
 
-    transcoder.addEventListener(Observable.propertyChangeEvent, (pcd: PropertyChangeData) => {
-      if (pcd.propertyName === 'progress' && pcd.value) {
-        this.set('progress', `${Math.round(pcd.value * 100)}%`);
+    transcoder.addEventListener(Observable.propertyChangeEvent, (
+      { propertyName, value }: PropertyChangeData
+    ) => {
+      if (propertyName === 'progress' && value) {
+        this.set('progress', `${Math.round(value * 100)}%`);
         return;
       }
-      this.set(pcd.propertyName, pcd.value);
+      this.set(propertyName, value);
     });
 
     transcoder.transcode().then(({ filePath }) => {

@@ -54,6 +54,16 @@ export const MediaAudioMimetypeAuto = ['AAC'];
 
 // export const FALLBACK_BITRATE = 1000 * 1000; // 1mbps
 
+/**
+ * Find smallest divider between two values
+ * @param {any} a
+ * @param {any} b
+ * @returns
+ */
+function gcd(a, b) {
+  return (b === 0) ? a : gcd(b, a % b);
+}
+
 export class Transcoder extends TranscoderCommon {
   private _rawUri: Uri;
   private _transcodedFile: File;
@@ -227,13 +237,40 @@ export class Transcoder extends TranscoderCommon {
           // OR constraint on large side and largeSide is Height
           if (inputWidth >= inputHeight === self.options.resolutionConstraint > 0) {
             outputHeight = self.options.resolutionConstraint;
-            outputWidth = inputWidth * self.options.resolutionConstraint / outputHeight;
+            outputWidth = inputWidth * self.options.resolutionConstraint / inputHeight;
+
+            if (outputWidth % 1 !== 0 && !self.options.strictResolutionConstraint) {
+              const dividor = gcd(inputHeight, inputWidth);
+              const ratioFraction = Math.round(inputHeight / dividor);
+              const multiplicator = Math.round(self.options.resolutionConstraint / ratioFraction);
+              outputHeight = multiplicator * inputHeight / dividor;
+              outputWidth = multiplicator * inputWidth / dividor;
+            }
           } else {
             outputWidth = self.options.resolutionConstraint;
-            outputHeight = inputHeight * self.options.resolutionConstraint / outputWidth;
+            outputHeight = inputHeight * self.options.resolutionConstraint / inputWidth;
+
+            if (outputHeight % 1 !== 0 && !self.options.strictResolutionConstraint) {
+              const dividor = gcd(inputHeight, inputWidth);
+              const ratioFraction = Math.round(inputWidth / dividor);
+              const multiplicator = Math.round(self.options.resolutionConstraint / ratioFraction);
+              outputHeight = multiplicator * inputHeight / dividor;
+              outputWidth = multiplicator * inputWidth / dividor;
+            }
           }
         }
 
+        /**
+         * Do not upscale !
+         */
+        if (outputWidth > inputWidth) {
+          outputWidth = inputWidth;
+          outputHeight = inputHeight;
+        }
+
+        /**
+         * If output resolution is not correct, try to divide input until we can
+         */
         if (outputWidth % 1 !== 0 || outputHeight % 1 !== 0) {
           return reject(new TranscoderException(
             TranscoderExceptionType.InvalidOutputResolution,
@@ -245,7 +282,10 @@ export class Transcoder extends TranscoderCommon {
         /**
          * Maybe we don't need to transcode at all!
          */
-        if (outputWidth >= inputWidth && outputBitrate >= inputBitrate && outputType === inputType) {
+        if ( outputWidth === inputWidth
+          && outputBitrate >= inputBitrate
+          && outputType === inputType
+        ) {
           console.log(`The video doesn't need encoding (skip). (${outputWidth}x${outputHeight})`);
           return null;
         }
@@ -253,7 +293,7 @@ export class Transcoder extends TranscoderCommon {
         /**
          * Finaly, create the format
          */
-        const format = MediaFormat.createVideoFormat(outputType, inputWidth, inputHeight);
+        const format = MediaFormat.createVideoFormat(outputType, outputWidth, outputHeight);
 
         format.setInteger(KEY_BIT_RATE, outputBitrate || 1000 * 1000);
         format.setInteger(KEY_I_FRAME_INTERVAL, 3);

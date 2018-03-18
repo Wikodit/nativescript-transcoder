@@ -15,9 +15,11 @@
           <Label row="2" col="1" text="{{error}}" color="red" textWrap="true" />
         </GridLayout>
       </ScrollView>
-      <GridLayout rows="auto" columns="*,*" >
+      <GridLayout rows="auto, auto" columns="*,*" >
         <Button row="0" col="0" text="Play sample" tap="{{playSample}}" />
         <Button row="0" col="1" text="Play transcoded" tap="{{playTranscoded}}" />
+        <Label row="1" col="0" text="{{rawFileSize}}" textAlign="center"/>
+        <Label row="1" col="1" text="{{transcodedFileSize}}" textAlign="center" />
       </GridLayout>
     </StackLayout>
     <VideoPlayer:Video row="1" col="0" height="100%" id="videoPlayer" />

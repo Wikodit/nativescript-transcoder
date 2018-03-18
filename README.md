@@ -12,6 +12,9 @@ The plugins support observing events as well as promises.
 
 **Only AAC audio is supported right now on Android, simulator camera is using 3GPP audio, so you can not test it with the simulator**
 
+**For hardware mode, only 720p resolution is supported on android, other resolutions may not work on some devices, a way to select the best profile may be developed**
+(Note for above for future developments on this plugin: CamcorderProfile is the way to go to retrieve all possible encoding resolutions, then we just need to select the best one according to settings).
+
 ## Installation
 
 ```bash
@@ -124,6 +127,7 @@ All options are optionals.
 | `audioCodec: TranscoderAudioCodec` | `TranscoderVideoCodec.Aac` | Define the audio codec to use. Only AAC supported for now. |
 | `nativeTranscoder: TranscoderNativeTranscoder` | `TranscoderNativeTranscoder.Hardware` | Define which native transcoder to use. Hardware is faster and better but FFMPEG is not dependant of what the device can or can not do. The hardware transcoder can always handle video taken by the device camera. Prefered choice is Hardware, but choose FFMPEG if video comes from unknown sources |
 | `resolutionConstraint: number` | `null` | Define the output resolution of the video. Positive number represent a constraint on the smaller side of the video. Negative number represent a constraint on the larger side of the video. Important: the video will never be scalled up ! (`null` to keep the original format). Ex: <br>- input: 1920x1080, resolutionConstraint: 720, output: 1280x720<br>- input: 1920x1080, resolutionConstraint: -720, output: 720x405 |
+| `strictResolutionConstraint: boolean` | `false` | If this is true, the transcoder will through an error if the video can not be scaled according to the defined `resolutionConstraint`. Otherwise, it will use the nearest possible resolution. (ex: 480p can not be achieve with 3140x2160, if `true` then an exception will be thrown, if `false` then output resolution will be 848x477). |
     
 
 ### TranscoderException
