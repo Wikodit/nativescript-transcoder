@@ -1,4 +1,4 @@
-import { Observable } from 'tns-core-modules/data/observable';
+import { Observable, PropertyChangeData } from 'tns-core-modules/data/observable';
 import { Transcoder, TranscoderEventList, TranscoderException } from 'nativescript-transcoder';
 import { VideoRecorder } from 'nativescript-videorecorder';
 import { Video } from 'nativescript-videoplayer';
@@ -11,7 +11,7 @@ export class MainViewModel extends Observable {
   public error: string = '';
 
   @ObservableProperty
-  public rawFilePath: string;
+  public rawFilePath: string = '/storage/emulated/0/Android/data/org.nativescript.demo/files/VID_1521396087926.mp4';
 
   @ObservableProperty
   public transcodedFilePath: string;
@@ -66,10 +66,16 @@ export class MainViewModel extends Observable {
       return;
     }
 
-    this.transcoder = new Transcoder(this.rawFilePath, {
-      videoBitrate: 1000 * 1000, // 1mbps
+    const transcoder = new Transcoder(this.rawFilePath, {
+      videoBitrate: 100 * 1000, // 100kbps
+      resolutionConstraint: 480,
     });
-    this.transcoder.transcode().then(({ filePath }) => {
+
+    transcoder.addEventListener(Observable.propertyChangeEvent, (pcd: PropertyChangeData) => {
+      this.set(pcd.propertyName, pcd.value);
+    });
+
+    transcoder.transcode().then(({ filePath }) => {
       this.transcodedFilePath = filePath;
     }).catch((err: TranscoderException) => {
       this.error = `${err.type} - ${err.message}`;
