@@ -27,7 +27,7 @@ import MediaFormatStrategyPresets = net.ypresto.androidtranscoder.format.MediaFo
 import MediaFormatStrategy = net.ypresto.androidtranscoder.format.MediaFormatStrategy;
 import MediaFormatExtraConstants = net.ypresto.androidtranscoder.format.MediaFormatExtraConstants;
 import { Observable } from 'tns-core-modules/ui/page/page';
-// import OutputFormatUnavailableException = net.ypresto.androidtranscoder.format.OutputFormatUnavailableException;
+import OutputFormatUnavailableException = net.ypresto.androidtranscoder.format.OutputFormatUnavailableException;
 
 export enum MediaVideoMimetype {
   H263 = 'video/3gpp',
@@ -78,7 +78,26 @@ export class Transcoder extends TranscoderCommon {
     const outputFilePath = this._transcodedFile.getAbsolutePath();
 
     let listener;
+    let rejectError;
     const listenerPromise = new Promise<TranscoderResult>((resolve, reject) => {
+      rejectError = (exception) => {
+        if (this.error) return;
+        this.status = TranscoderStatus.Failed;
+        this.progress = null;
+
+        const msg = exception.getLocalizedMessage
+          ? exception.getLocalizedMessage()
+          : exception.getMessage
+            ? exception.getMessage()
+            : (<any>exception).message || 'unknown error';
+
+        const err = new TranscoderException(TranscoderExceptionType.Failed, msg, exception);
+
+        this.notify({ eventName: TranscoderEventList.Failed, object: this, err });
+        reject(err);
+        this.error = err;
+      };
+
       listener = new MediaTranscoder.Listener({
         onTranscodeCompleted: () => {
           this.status = TranscoderStatus.Completed;
@@ -95,21 +114,7 @@ export class Transcoder extends TranscoderCommon {
             'User has canceled the transcoding'
           ));
         },
-        onTranscodeFailed: (exception) => {
-          this.status = TranscoderStatus.Failed;
-          this.progress = null;
-
-          const msg = exception.getLocalizedMessage
-            ? exception.getLocalizedMessage()
-            : exception.getMessage
-              ? exception.getMessage()
-              : (<any>exception).message || 'unknown error';
-
-          const err = new TranscoderException(TranscoderExceptionType.Failed, msg, exception );
-
-          this.notify({ eventName: TranscoderEventList.Failed, object: this, err });
-          reject(err);
-        },
+        onTranscodeFailed: rejectError,
         onTranscodeProgress: (progress) => {
           console.log(`Progress: ${progress}`);
           this.status = TranscoderStatus.Transcoding;
@@ -122,7 +127,10 @@ export class Transcoder extends TranscoderCommon {
     MediaTranscoder.getInstance().transcodeVideo(
       fileDescriptor,
       this._transcodedFile.getAbsolutePath(),
-      this._getStrategy(),
+      this._getStrategy((err: any) => {
+        rejectError(err);
+        return null;
+      }),
       listener,
     );
 
@@ -147,7 +155,7 @@ export class Transcoder extends TranscoderCommon {
     }
   }
 
-  protected _getStrategy(): MediaFormatStrategy {
+  protected _getStrategy(reject): MediaFormatStrategy {
     const self = this;
     return new MediaFormatStrategy({
       /**
@@ -158,6 +166,7 @@ export class Transcoder extends TranscoderCommon {
        * @memberof Transcoder
        */
       createVideoOutputFormat(inputFormat: MediaFormat): MediaFormat {
+        if (self.error) return null;
         const {
           KEY_WIDTH,
           KEY_HEIGHT,
@@ -201,10 +210,10 @@ export class Transcoder extends TranscoderCommon {
         }
 
         if (!self._codecsCapabilities[outputType]) {
-          throw new TranscoderException(
+          return reject(new TranscoderException(
             TranscoderExceptionType.InvalidOutputVideoCodec,
             `Codec for ${outputType} is not available on this device`,
-          );
+          ));
         }
 
         /**
@@ -226,10 +235,10 @@ export class Transcoder extends TranscoderCommon {
         }
 
         if (outputWidth % 1 !== 0 || outputHeight % 1 !== 0) {
-          throw new TranscoderException(
+          return reject(new TranscoderException(
             TranscoderExceptionType.InvalidOutputResolution,
             `This video will generate an invalid resolution output. (${outputWidth}x${outputHeight})`,
-          );
+          ));
         }
 
 
@@ -257,10 +266,10 @@ export class Transcoder extends TranscoderCommon {
          * We also need to check if the codec can handle this format
          */
         if (!(<any>self._codecsCapabilities[outputType]).isFormatSupported(format)) {
-          throw new TranscoderException(
+          return reject(new TranscoderException(
             TranscoderExceptionType.InvalidOutputFormat,
             `Unfortunately your device doesn't support transcoding to this format.`,
-          );
+          ));
         }
 
         // Lolipop doesn't like isFormatSupported with framerate, so we put it after
@@ -278,6 +287,7 @@ export class Transcoder extends TranscoderCommon {
        * @memberof Transcoder
        */
       createAudioOutputFormat(inputFormat: MediaFormat): MediaFormat {
+        if (self.error) return null;
         if (!self.options.audioBitrate) return null;
 
         // Use original sample rate, as resampling is not supported yet.

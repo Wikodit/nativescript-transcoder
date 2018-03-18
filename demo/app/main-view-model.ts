@@ -4,6 +4,7 @@ import { VideoRecorder } from 'nativescript-videorecorder';
 import { Video } from 'nativescript-videoplayer';
 import { alert } from 'tns-core-modules/ui/dialogs';
 import { ObservableProperty } from 'nativescript-transcoder/decorators';
+import { getString, setString } from 'tns-core-modules/application-settings';
 // import MediaCodecInfo = android.media.MediaCodecInfo;
 
 export class MainViewModel extends Observable {
@@ -11,10 +12,10 @@ export class MainViewModel extends Observable {
   public error: string = '';
 
   @ObservableProperty
-  public rawFilePath: string = '/storage/emulated/0/Android/data/org.nativescript.demo/files/VID_1521396087926.mp4';
+  public rawFilePath: string = getString('rawFilePath');
 
   @ObservableProperty
-  public transcodedFilePath: string;
+  public transcodedFilePath: string = getString('transcodedFilePath');
 
   public videoPlayer: Video;
   private transcoder: Transcoder = null;
@@ -55,6 +56,7 @@ export class MainViewModel extends Observable {
     vr.record().then(({ file }) => {
       this.rawFilePath = file;
       console.log('rawFilePath', file);
+      setString('rawFilePath', file);
     }).catch((err) => {
       this.error = err.event || err.message || 'An error occured';
     });
@@ -72,11 +74,16 @@ export class MainViewModel extends Observable {
     });
 
     transcoder.addEventListener(Observable.propertyChangeEvent, (pcd: PropertyChangeData) => {
+      if (pcd.propertyName === 'progress' && pcd.value) {
+        this.set('progress', `${Math.round(pcd.value * 100)}%`);
+        return;
+      }
       this.set(pcd.propertyName, pcd.value);
     });
 
     transcoder.transcode().then(({ filePath }) => {
       this.transcodedFilePath = filePath;
+      setString('transcodedFilePath', filePath);
     }).catch((err: TranscoderException) => {
       this.error = `${err.type} - ${err.message}`;
     });

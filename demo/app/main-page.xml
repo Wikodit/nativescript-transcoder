@@ -10,7 +10,7 @@
           <Label row="0" col="0" text="Transcoder Status: " />
           <Label row="0" col="1" text="{{status}}" textWrap="true" />
           <Label row="1" col="0" text="Transcoder Progress: " />
-          <Label row="1" col="1" text="{{progress}}" color="red" textWrap="true" />
+          <Label row="1" col="1" text="{{progress}}" textWrap="true" />
           <Label row="2" col="0" text="Error: " />
           <Label row="2" col="1" text="{{error}}" color="red" textWrap="true" />
         </GridLayout>

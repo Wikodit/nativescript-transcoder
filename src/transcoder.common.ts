@@ -189,6 +189,14 @@ export abstract class TranscoderCommon extends Observable {
   public status: TranscoderStatus = TranscoderStatus.Idle;
 
   /**
+   * Store the last error that occured
+   * @type {number}
+   * @memberof TranscoderCommon
+   */
+  @ObservableProperty
+  public error: any = null;
+
+  /**
    * FilePath of file which will be transcoded.
    * @type {string}
    * @readonly
